@@ -16,7 +16,7 @@ import java.net.URI;
  */
 public class HDFSApp {
 
-    public static final String HADOOP_URI = "hdfs://SuperComputer:8020";
+    public static final String HADOOP_URI = "hdfs://ronin:8020";
 
     FileSystem fileSystem = null;
     Configuration configuration = null;
@@ -28,7 +28,7 @@ public class HDFSApp {
     @Before
     public void setUp() throws  Exception{
         configuration = new Configuration();
-        fileSystem = FileSystem.get(new URI(HADOOP_URI),configuration);
+        fileSystem = FileSystem.get(new URI(HADOOP_URI),configuration,"root");
         System.out.println("setUp");
     }
 

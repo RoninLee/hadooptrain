@@ -1,13 +1,17 @@
 package com.bigdata.hadoop.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.Progressable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URI;
 
 /**
@@ -16,7 +20,7 @@ import java.net.URI;
  */
 public class HDFSApp {
 
-    public static final String HADOOP_URI = "hdfs://ronin:8020";
+    public static final String HADOOP_URI = "hdfs://SuperComputer:8020";
 
     FileSystem fileSystem = null;
     Configuration configuration = null;
@@ -33,13 +37,100 @@ public class HDFSApp {
     }
 
     /**
-     * 创建目录
+     * 创建HDFS目录
      */
     @Test
     public void mkdir()throws Exception{
         fileSystem.mkdirs(new Path("/app/test"));
     }
 
+    /**
+     *创建HDFS文件
+     * @throws Exception
+     */
+    @Test
+    public void create()throws Exception{
+        FSDataOutputStream outputStream = fileSystem.create(new Path("/test/hadoop.txt"));
+        outputStream.write("hello hadoop".getBytes());
+        outputStream.flush();
+        outputStream.close();
+    }
+
+    /**
+     * 读取HDFS文件内容
+     * @throws Exception
+     */
+    @Test
+    public void read()throws Exception{
+        FSDataInputStream stream = fileSystem.open(new Path("/test/hadoop.txt"));
+        IOUtils.copyBytes(stream,System.out,1024);
+        stream.close();
+    }
+
+    /**
+     * 上传文件到HDFS上
+     * @throws Exception
+     */
+    @Test
+    public void put()throws Exception{
+        fileSystem.copyFromLocalFile(new Path("/app/data/h.txt"),new Path("/app/test/a.txt"));
+    }
+
+    /**
+     * 从HDFS上下载文件
+     * @throws Exception
+     */
+    @Test
+    public void get()throws Exception{
+        fileSystem.copyToLocalFile(new Path("/app/test/a.txt"),new Path("/app/data/b.txt"));
+    }
+
+    /**
+     * 删除HDFS文件
+     * @throws Exception
+     */
+    @Test
+    public void del()throws Exception{
+        fileSystem.delete(new Path("/test/jdk181.tgx"),true);
+    }
+
+    /**
+     * 删除HDFS目录
+     * @throws Exception
+     */
+    @Test
+    public void delDir()throws Exception{
+        fileSystem.delete(new Path("/app/test"),true);
+    }
+
+    /**
+     * HDFS文件重命名
+     * @throws Exception
+     */
+    @Test
+    public void rename()throws Exception{
+        fileSystem.rename(new Path("/app"),new Path("/test"));
+    }
+
+    @Test
+    public void bigFile()throws Exception{
+        InputStream in = new BufferedInputStream(new FileInputStream(new File("/app/software/jdk-8u161-linux-x64.tar.gz")));
+        FSDataOutputStream outputStream = fileSystem.create(new Path("/test/jdk181.tgz"), new Progressable() {
+            @Override
+            public void progress() {
+                System.out.print("*");
+            }
+        });
+        IOUtils.copyBytes(in,outputStream,4096);
+    }
+    /**
+     *
+     * @throws Exception
+     */
+    @Test
+    public void ls()throws Exception{
+        RemoteIterator<LocatedFileStatus> listFiles = fileSystem.listFiles(new Path("/"), true);
+    }
     /**
      * 清除资源文件，资源文件关闭操作
      * @throws Exception

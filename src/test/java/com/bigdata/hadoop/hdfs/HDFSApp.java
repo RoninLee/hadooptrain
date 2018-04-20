@@ -124,12 +124,22 @@ public class HDFSApp {
         IOUtils.copyBytes(in,outputStream,4096);
     }
     /**
-     *
+     * 查看HDFS下的所有目录
+     * desc:如果本地上传到服务器，副本个数可能是hadoop默认的3个，因为我linux上hdfs-sit.xml上设置节点是1
+     *      通过hadoop shell put文件时，副本系数是1
+     *      通过java API上传文件的时候，在本地并没有手工设置副本系数，所以采用的是hadoop自己默认的副本系数3
      * @throws Exception
      */
     @Test
     public void ls()throws Exception{
-        RemoteIterator<LocatedFileStatus> listFiles = fileSystem.listFiles(new Path("/"), true);
+        FileStatus[] listFiles = fileSystem.listStatus(new Path("/"));
+        for (FileStatus fileStatus : listFiles){
+            String s = fileStatus.isDirectory() ? "文件夹" : "文件";
+            short replication = fileStatus.getReplication();
+            long len = fileStatus.getLen();
+            Path path = fileStatus.getPath();
+            System.out.println(s+"\t"+replication+"\t"+len+"\t"+path.toString());
+        }
     }
     /**
      * 清除资源文件，资源文件关闭操作

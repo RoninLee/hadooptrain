@@ -1,6 +1,7 @@
 package com.bigdata.hadoop.mapreduce;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -15,7 +16,7 @@ import java.io.IOException;
 /**
  * Created by RoninLee on 18-4-23.
  */
-public class WordCountApp {
+public class WordCount2App {
 
     /**
      * map:读取输入德文件
@@ -58,14 +59,23 @@ public class WordCountApp {
      */
     public static void main(String[] args) throws Exception{
 
+
         //创建Configuration
         Configuration configuration = new Configuration();
+
+        //当再次执行脚本的时候，清除已存在的目录
+        Path outputPath = new Path(args[1]);
+        FileSystem fileSystem = FileSystem.get(configuration);
+        if (fileSystem.exists(outputPath)){
+           fileSystem.delete(outputPath,true);
+            System.out.println("output file exists,but it has deleted");
+        }
 
         //创建Job
         Job job = Job.getInstance(configuration,"wordcount");
 
         //创建job的处理类
-        job.setJarByClass(WordCountApp.class);
+        job.setJarByClass(WordCount2App.class);
 
         //设置作业处理的输入路径
         FileInputFormat.setInputPaths(job,new Path(args[0]));

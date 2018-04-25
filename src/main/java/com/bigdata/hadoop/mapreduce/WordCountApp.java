@@ -13,6 +13,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import java.io.IOException;
 
 /**
+ * 使用MapReduce开发WordCount应用程序
  * Created by RoninLee on 18-4-23.
  */
 public class WordCountApp {

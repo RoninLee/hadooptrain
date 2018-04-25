@@ -15,9 +15,9 @@ import java.io.IOException;
 
 /**
  * 使用MapReduce开发WordCount应用程序
- * Created by RoninLee on 18-4-23.
+ * Created by RoninLee on 18-4-25.
  */
-public class WordCount2App {
+public class CombinerApp {
 
     /**
      * map:读取输入德文件
@@ -76,7 +76,7 @@ public class WordCount2App {
         Job job = Job.getInstance(configuration,"wordcount");
 
         //创建job的处理类
-        job.setJarByClass(WordCount2App.class);
+        job.setJarByClass(CombinerApp.class);
 
         //设置作业处理的输入路径
         FileInputFormat.setInputPaths(job,new Path(args[0]));
@@ -90,6 +90,9 @@ public class WordCount2App {
         job.setReducerClass(myReduce.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(LongWritable.class);
+
+        //通过job设置combiner处理类，其实逻辑上面和reduce是一模一样的
+        job.setCombinerClass(myReduce.class);
 
         //设置作业处理的输出路径
         FileOutputFormat.setOutputPath(job,new Path(args[1]));

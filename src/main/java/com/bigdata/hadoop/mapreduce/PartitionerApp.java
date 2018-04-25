@@ -7,23 +7,20 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.IOException;
 
-/**
- * 使用MapReduce开发WordCount应用程序
- * Created by RoninLee on 18-4-23.
- */
-public class WordCount2App {
+
+public class PartitionerApp {
 
     /**
      * map:读取输入德文件
      */
     public static class myMapper extends Mapper<LongWritable ,Text,Text,LongWritable>{
-        LongWritable one = new LongWritable(1);
 
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -31,10 +28,7 @@ public class WordCount2App {
             String line = value.toString();
             //按照制定的分割符进行分割
             String[] words = line.split(" ");
-            for (String word : words){
-                //通过上下文把map的处理结果输出
-                context.write(new Text(word),one);
-            }
+            context.write(new Text(words[0]),new LongWritable(Long.parseLong(words[1])));
         }
     }
 
@@ -51,6 +45,26 @@ public class WordCount2App {
             }
             //最终统计结果的输出
             context.write(key,new LongWritable(num));
+        }
+    }
+
+    public static class myPartitioner extends Partitioner<Text,LongWritable> {
+
+        @Override
+        public int getPartition(Text key, LongWritable value, int numPartitions) {
+            if (key.toString().equals("honor")){
+                return 0;
+            }
+
+            if (key.toString().equals("huawei")){
+                return 1;
+            }
+
+            if (key.toString().equals("xiaomi")){
+                return 2;
+            }
+
+            return 3;
         }
     }
 
@@ -76,7 +90,7 @@ public class WordCount2App {
         Job job = Job.getInstance(configuration,"wordcount");
 
         //创建job的处理类
-        job.setJarByClass(WordCount2App.class);
+        job.setJarByClass(PartitionerApp.class);
 
         //设置作业处理的输入路径
         FileInputFormat.setInputPaths(job,new Path(args[0]));
@@ -90,6 +104,11 @@ public class WordCount2App {
         job.setReducerClass(myReduce.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(LongWritable.class);
+
+        //设置job的partition
+        job.setPartitionerClass(myPartitioner.class);
+        //设置4个reducer，每个分区一个
+        job.setNumReduceTasks(4);
 
         //设置作业处理的输出路径
         FileOutputFormat.setOutputPath(job,new Path(args[1]));

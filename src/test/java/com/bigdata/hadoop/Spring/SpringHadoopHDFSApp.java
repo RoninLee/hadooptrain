@@ -42,7 +42,7 @@ public class SpringHadoopHDFSApp {
      */
     @Test
     public void myPut()throws Exception{
-        filesystem.copyFromLocalFile(new Path("/app/file/hello.txt"),new Path("/springhadoop/"));
+        filesystem.copyFromLocalFile(new Path("/app/file/partitioner.txt"),new Path("/springhadoop/"));
     }
 
     /**
@@ -50,7 +50,7 @@ public class SpringHadoopHDFSApp {
      */
     @Test
     public void myText()throws Exception{
-        FSDataInputStream open = filesystem.open(new Path("/springhadoop/hello.txt"));
+        FSDataInputStream open = filesystem.open(new Path("/springhadoop/partitioner.txt"));
         IOUtils.copyBytes(open,System.out,1024);
         open.close();
     }
